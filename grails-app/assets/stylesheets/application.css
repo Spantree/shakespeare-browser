@@ -1,0 +1,31 @@
+/*
+* This is a manifest file that'll be compiled into application.css, which will include all the files
+* listed below.
+*
+* Any CSS file within this directory can be referenced here using a relative path.
+*
+* You're free to add application-wide styles to this file and they'll appear at the top of the
+* compiled file, but it's generally better to create a new file per style scope.
+*
+*= require main
+*= require mobile
+*= require_self
+*/
+h1, h3, h5, p {
+    margin: 15px;
+}
+
+input {
+    margin: 15px;
+    width: 500px;
+}
+
+em {
+    background-color: #ffe4b0;
+    font-style: normal;
+}
+
+a {
+    text-decoration: none;
+    padding: 0px;
+}
