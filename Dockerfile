@@ -20,8 +20,8 @@ RUN ln -s $CATALINA_HOME/webapps/ROOT /data
 
 # Clean out ROOT and add our workspace
 WORKDIR /data
-ONBUILD RUN rm -rf *
-ONBUILD ADD target/shakespeare-browser-0.1.war /data/ROOT.war
+RUN rm -rf *
+ADD target/shakespeare-browser-0.1.war /data/ROOT.war
 
 EXPOSE 8080
 
