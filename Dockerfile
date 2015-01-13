@@ -15,13 +15,9 @@ RUN wget -q https://archive.apache.org/dist/tomcat/tomcat-$TOMCAT_MAJOR_VERSION/
 # Remove management, config and documentations contexts but keep ROOT
 RUN find $CATALINA_HOME/webapps/* ! -name 'ROOT' -type d -exec rm -rf {} +
 
-# Use /data for easier volume handling
-RUN ln -s $CATALINA_HOME/webapps/ROOT /data
-
 # Clean out ROOT and add our workspace
-WORKDIR /data
-RUN rm -rf *
-ADD shakespeare-browser-0.1.war /data/ROOT.war
+RUN rm -rf $CATALINA_HOME/webapps/*
+ADD shakespeare-browser-0.1.war $CATALINA_HOME/webapps/ROOT.war
 
 EXPOSE 8080
 
