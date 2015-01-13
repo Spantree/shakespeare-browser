@@ -7,7 +7,7 @@ class UrlMappings {
             }
         }
 
-        "/"(view:"/index")
+        "/"(controller: 'shakespeare', action: 'listPlays')
         "500"(view:'/error')
         "/shakespeare/plays"(controller: 'shakespeare', action: 'listPlays')
         "/shakespeare/lines"(controller: 'shakespeare', action: 'listLines')
