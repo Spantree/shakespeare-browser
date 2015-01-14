@@ -108,7 +108,11 @@ log4j.main = {
     //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
     //}
     root {
-        info()
+        info 'stdout'
+    }
+
+    appenders {
+        console name: 'stdout'
     }
 
     error  'org.codehaus.groovy.grails.web.servlet',        // controllers
