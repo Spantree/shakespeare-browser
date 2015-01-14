@@ -15,9 +15,11 @@ class ElasticsearchService {
     @PostConstruct
     void init() {
         jestClientFactory = new JestClientFactory(
-            httpClientConfig: new HttpClientConfig.Builder(System.properties.getProperty('ES_ROOT') ?: "http://slave1:9200")
-                .multiThreaded(true)
-                .build()
+            httpClientConfig: new HttpClientConfig.Builder([
+                "http://slave1:9200",
+                "http://slave2:9200"
+            ]).multiThreaded(true)
+            .build()
         )
     }
 
