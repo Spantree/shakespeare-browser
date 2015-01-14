@@ -27,7 +27,7 @@
             <g:each var="bucket" in="${buckets}">
                 <tr>
                     <td><a href="/shakespeare/lines?playName=${bucket.key}">${bucket.key}</a></td>
-                    <td><a href="/shakespeare/lines?playName=${bucket.key}">${bucket.docCount}</a></td>
+                    <td><a href="/shakespeare/lines?playName=${bucket.key}">${bucket.doc_count.intValue()}</a></td>
                 </tr>
             </g:each>
         </tbody>

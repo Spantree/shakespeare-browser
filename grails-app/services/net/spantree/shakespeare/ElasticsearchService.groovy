@@ -1,9 +1,8 @@
 package net.spantree.shakespeare
 
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
-import org.elasticsearch.client.Client
-import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.transport.InetSocketTransportAddress
+import io.searchbox.client.JestClient
+import io.searchbox.client.JestClientFactory
+import io.searchbox.client.config.HttpClientConfig
 
 import javax.annotation.PostConstruct
 
@@ -11,12 +10,18 @@ import javax.annotation.PostConstruct
  * Created by cedric on 1/11/15.
  */
 class ElasticsearchService {
-    Client client
+    def jestClientFactory
 
     @PostConstruct
     void init() {
-        client = new TransportClient()
-            .addTransportAddress(new InetSocketTransportAddress("slave1", 9300))
-            .addTransportAddress(new InetSocketTransportAddress("slave2", 9300))
+        jestClientFactory = new JestClientFactory(
+            httpClientConfig: new HttpClientConfig.Builder(System.properties.getProperty('ES_ROOT') ?: "http://slave1:9200")
+                .multiThreaded(true)
+                .build()
+        )
+    }
+
+    JestClient getJestClient() {
+        jestClientFactory.getObject()
     }
 }

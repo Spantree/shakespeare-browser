@@ -1,5 +1,7 @@
 package net.spantree.shakespeare
 
+import grails.converters.JSON
+import io.searchbox.core.Search
 import org.elasticsearch.index.query.FilterBuilders
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.AggregationBuilder
@@ -17,16 +19,27 @@ class ShakespeareController {
     def indexName = "shakespeare"
 
     def listPlays() {
-        def client = elasticsearchService.client
-        def resp = client.prepareSearch(indexName)
-            .addAggregation(
-                AggregationBuilders.terms("play").field("play_name")
-            )
-            .execute().actionGet()
-        StringTerms terms = resp.aggregations.get("play")
-        println terms.buckets.size()
+        def client = elasticsearchService.jestClient
+        def q = [
+            query: [
+                match_all: [:]
+            ],
+            aggs: [
+                play_name: [terms: ["field": "play_name"]]
+            ],
+            size: 0
+        ] as JSON
+
+        def search = new Search.Builder(q.toString())
+            .addIndex(indexName)
+            .build()
+
+        def resp = client.execute(search)
+
+        def buckets = resp.jsonMap.aggregations.play_name.buckets
+
         [
-            buckets: terms.buckets,
+            buckets: buckets,
             serverId: serverIdService.serverId
         ]
     }
@@ -35,34 +48,56 @@ class ShakespeareController {
         def playName = params.playName
         def searchText = params.searchText
 
-        def client = elasticsearchService.client
-        def search = client.prepareSearch(indexName)
-            .setPostFilter(FilterBuilders.termFilter("play_name", playName))
-            .addSort(SortBuilders.fieldSort("line_id"))
-            .setSize(100)
-            .addHighlightedField("text_entry")
-            .addHighlightedField("speaker")
+        def client = elasticsearchService.jestClient
+
+        def query = [match_all: [:]]
 
         if(searchText) {
-            search.setQuery(
-                QueryBuilders.multiMatchQuery(searchText, "text_entry", "speaker")
-            )
+            query = [
+                multi_match: [
+                    query: searchText,
+                    fields: ["text_entry", "speaker"]
+                ]
+            ]
         }
-        def resp = search.execute().actionGet()
 
-        def lines = resp.hits.hits.collect { hit ->
-            def highlight = hit.highlightFields()
-            def source = hit.sourceAsMap()
+        def q = [
+            query: [
+                filtered: [
+                    query: query,
+                    filter: [
+                        term: [play_name: playName]
+                    ]
+                ]
+            ],
+            highlight: [
+                fields: [
+                    "speaker": [:],
+                    "text_entry": [:]
+                ]
+            ],
+            size: 100
+        ] as JSON
+
+        def search = new Search.Builder(q.toString())
+            .addIndex(indexName)
+            .build()
+
+        def resp = client.execute(search)
+
+        def lines = resp.jsonMap.hits.hits.collect { hit ->
+            def highlight = hit.highlight
+            def source = hit._source
             [
-                speaker: highlight['speaker']?.fragments()?.first()?.string() ?: source['speaker'],
-                text: highlight['text_entry']?.fragments()?.first()?.string() ?: source['text_entry'],
+                speaker: highlight?.speaker?.first() ?: source['speaker'],
+                text: highlight?.text_entry?.first() ?: source['text_entry'],
             ]
         }
 
         [
             playName: playName,
             searchText: searchText,
-            count: resp.hits.totalHits,
+            count: resp.total,
             lines: lines,
             serverId: serverIdService.serverId
         ]
