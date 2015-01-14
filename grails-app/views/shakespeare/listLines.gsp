@@ -15,7 +15,7 @@
 
 <body>
 <div id="page-body" role="main">
-    <h1><a href="/shakespeare/plays">Shakespeare Plays</a> > ${playName}</h1>
+    <h1><a href="/shakespeare/plays">Selected Shakespeare Plays</a> > ${playName}</h1>
     <p>via server <strong>${serverId}</strong></p>
     <form action="/shakespeare/lines" method="GET">
         <input type="hidden" name="playName" value="${playName}"/>
